@@ -1,0 +1,104 @@
+[
+  {
+    "beat_id": "sample_001",
+    "schema_version": "v2",
+    "entry_ref": "Entry 01",
+    "date": "YYYY-MM-DD",
+    "emotion": "cautious curiosity",
+    "pain_gain": "gain",
+    "activity_type": "prompting",
+    "action": "Ran a first structured prompt to get feedback on a piece of work usually reviewed by a colleague.",
+    "verbatim": "I wasn't sure what to expect. But it actually... pushed back. In a useful way.",
+    "job_to_be_done": "Get honest external feedback on work in the absence of a trusted peer.",
+    "complexity": 1,
+    "subject": "self",
+    "open_question": "Is this a sustainable substitute for human feedback \u2014 or just a stopgap?",
+    "phase": null,
+    "themes": [
+      "#tool-as-mirror",
+      "#delegation"
+    ]
+  },
+  {
+    "beat_id": "sample_002",
+    "schema_version": "v2",
+    "entry_ref": "Entry 03",
+    "date": "YYYY-MM-DD",
+    "emotion": "flat frustration",
+    "pain_gain": "pain",
+    "activity_type": "hitting a limit",
+    "action": "Asked AI to help diagnose a problem in a domain where baseline knowledge was thin \u2014 received plausible but unverifiable output.",
+    "verbatim": "It gave me an answer. A confident one. I just had no way to know if it was right.",
+    "job_to_be_done": "Use AI to accelerate learning in an unfamiliar domain.",
+    "complexity": 2,
+    "subject": "self",
+    "open_question": "How do you evaluate AI output on a topic you don't know well enough to verify?",
+    "phase": null,
+    "themes": [
+      "#limit-of-the-tool",
+      "#limit-of-the-self"
+    ]
+  },
+  {
+    "beat_id": "sample_003",
+    "schema_version": "v2",
+    "entry_ref": "Entry 05",
+    "date": "YYYY-MM-DD",
+    "emotion": "reluctant reframe",
+    "pain_gain": "tension",
+    "activity_type": "reflecting",
+    "action": "Recognised after a failed experiment that the constraint was not the tool but the absence of a clear problem definition going in.",
+    "verbatim": "The tool did exactly what I asked. That was the problem. I asked the wrong thing.",
+    "job_to_be_done": "Understand where AI failure begins \u2014 in the tool or in the brief.",
+    "complexity": 2,
+    "subject": "self",
+    "open_question": null,
+    "phase": null,
+    "themes": [
+      "#limit-of-the-self",
+      "#reframe"
+    ]
+  },
+  {
+    "beat_id": "sample_004",
+    "schema_version": "v2",
+    "entry_ref": "Entry 07",
+    "date": "YYYY-MM-DD",
+    "emotion": "detached observation",
+    "pain_gain": "tension",
+    "activity_type": "observing others",
+    "action": "Watched a colleague present AI-generated output in a meeting without being able to defend or contextualise its contents.",
+    "verbatim": "They knew the document existed. They didn't know what was in it.",
+    "job_to_be_done": "Understand what it means to own output produced with AI assistance.",
+    "complexity": 1,
+    "subject": "other",
+    "open_question": "When AI produces the artifact \u2014 who holds the knowledge?",
+    "phase": null,
+    "themes": [
+      "#observation-of-others",
+      "#delegation",
+      "#tool-as-mirror"
+    ]
+  },
+  {
+    "beat_id": "sample_005",
+    "schema_version": "v2",
+    "entry_ref": "Entry 09",
+    "date": "YYYY-MM-DD",
+    "emotion": "surprised recognition",
+    "pain_gain": "breakthrough",
+    "activity_type": "reflecting",
+    "action": "Noticed mid-conversation that a way of framing a problem \u2014 developed through repeated AI dialogue \u2014 had permanently replaced the old one.",
+    "verbatim": "I don't think I can go back to thinking about it the other way. That framing is just... gone.",
+    "job_to_be_done": "Track how AI interaction changes underlying mental models over time.",
+    "complexity": 2,
+    "subject": "self",
+    "open_question": null,
+    "phase": null,
+    "themes": [
+      "#tool-as-mirror",
+      "#reframe",
+      "#dependency"
+    ]
+  }
+]
