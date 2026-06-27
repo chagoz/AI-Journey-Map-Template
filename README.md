@@ -77,6 +77,7 @@ docs/
   schema.md            — field-by-field reference
   taxonomy.md          — theme definitions, application rules, linguistic anchors
   changelog.md         — your rule changes, versioned
+  SKILL.md             — the extraction skill, ready to upload to Cowork
 ```
 
 ---
