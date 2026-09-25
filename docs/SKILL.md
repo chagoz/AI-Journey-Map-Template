@@ -1,27 +1,27 @@
 ---
 name: ai-journey-map-extraction
-description: Extraction skill for the AI Journey Map project. Run this skill whenever new voice note entries need processing. Reads your raw voice note archive in Notion, compares against the live corpus on GitHub, extracts structured emotional beats from unprocessed entries following the rules in the GitHub docs folder, and commits new beats directly to GitHub via the API. Triggers on any phrase suggesting new entries need processing, or runs automatically on schedule.
+description: Extraction skill for the AI Journey Map project. Run this skill whenever new voice note entries need processing. Reads new rows from your Voice notes database in Notion, compares against the live corpus on GitHub, extracts structured emotional beats from unprocessed entries following the rules in the GitHub docs folder, and commits new beats to GitHub via the API. Runs on chat trigger only, for example "process new entries" or "run extraction".
 ---
 
-# AI Journey Map — Extraction Skill v3
+# AI Journey Map: Extraction Skill v4
 
-Fully cloud-based. Reads rules and corpus from GitHub. Reads entries from Notion. Writes beats back to GitHub via API. No local files required.
-
----
-
-## Credentials
-
-Read from Cowork project instructions:
-- `GITHUB_TOKEN` — your personal access token with repo scope
-- `GITHUB_REPO` — your forked repo name, format: `username/repo-name`
-
-These are never written to any file or output.
+Fully cloud-based. Reads rules and corpus from GitHub. Reads entries from a Notion database. Writes beats back to GitHub via API. No local files required.
 
 ---
 
-## Source URLs
+## Credentials and configuration
 
-Update these to point to your forked repo before running.
+Read from project instructions:
+- `GITHUB_TOKEN`: your personal access token with repo scope
+- `GITHUB_REPO`: your repo name, format `username/repo-name`
+- `NOTION_VOICE_NOTES`: the data source ID of your Voice notes database
+- `NOTION_PROJECT_LOG`: the page ID of your project log
+
+These are never written to any file or output. If any is missing, stop and ask for it.
+
+---
+
+## Source setup
 
 **Rules and docs (raw GitHub):**
 - Methodology: `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/methodology.md`
@@ -32,28 +32,32 @@ Update these to point to your forked repo before running.
 **Corpus (GitHub API):**
 - `https://api.github.com/repos/{GITHUB_REPO}/contents/data/corpus.json`
 
-**Notion:**
-- Your raw voice note archive page — update the page name in Step 3 to match yours
+**Voice notes database (Notion):**
+One row per voice note. The row's page content is the raw transcript. Rows are never edited after creation. Required properties:
+- `Entry` (title): "Entry 01", "Entry 02"... Numbers only ever increase.
+- `Date` (date): recording date
+- `Type` (select): Entry or Addendum
+- Optional: `Headline`, `Location`, `Parent entry` (relation, for addendums)
 
-**Notion project log:**
-- Your Notion project log page URL — update Step 8 to point to yours
+**Project log (Notion):**
+- The page at `NOTION_PROJECT_LOG`
 
 ---
 
-## Step 1 — Read the rules
+## Step 1: Read the rules
 
 Fetch and read these four documents in order:
 
-1. `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/methodology.md` — the intellectual foundation. Understand the beat definition, the hybrid emotion protocol, and the declared limitations.
-2. `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/schema.md` — the field reference. Confirm field names, types, and constraints before extracting any record.
-3. `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/extraction-rules.md` — the mechanical rules. Every field definition, every anti-inference rule, every edge case.
-4. `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/taxonomy.md` — the theme taxonomy. Read the full definition and linguistic anchor for every tag before applying any.
+1. `methodology.md`: the intellectual foundation. Understand the beat definition, the hybrid emotion protocol, and the declared limitations.
+2. `schema.md`: the field reference. Confirm field names, types, and constraints before extracting any record.
+3. `extraction-rules.md`: the mechanical rules. Every field definition, every anti-inference rule, every edge case.
+4. `taxonomy.md`: the theme taxonomy. Read the full definition and linguistic anchor for every tag before applying any.
 
 Do not proceed until all four are read and confirmed. If any fetch fails, stop and log the failure.
 
 ---
 
-## Step 2 — Fetch the current corpus
+## Step 2: Fetch the current corpus
 
 Fetch the corpus via GitHub API:
 
@@ -64,27 +68,31 @@ Accept: application/vnd.github.v3+json
 ```
 
 From the response:
-- Decode the base64 `content` field to get the JSON array
-- Store the `sha` value — required for the write step
-- Identify the highest `entry_ref` value — last processed entry
-- Identify the highest `beat_id` value — next beat starts from this number + 1
+- Decode the base64 `content` field as UTF-8 to get the JSON array
+- Store the `sha` value, required for the write step
+- Identify the last processed entry: parse the number from every `entry_ref` and take the highest, as a number, not as text
+- Identify the next beat_id: parse the number from every `beat_id`, take the highest, add 1
 - Note total beats in corpus
 
 If the corpus is empty, start from Entry 01 and beat_001.
 
 ---
 
-## Step 3 — Read your voice note archive from Notion
+## Step 3: Read new entries from the Voice notes database
 
-Use the Notion connector to fetch your raw voice note archive page.
+Use the Notion connector to query the database at `NOTION_VOICE_NOTES`.
 
-List all entries. Compare against the last processed entry from Step 2. Identify all entries that come after it.
+List all rows. Parse the number from each row's `Entry` property as a number. Select every row with a number higher than the last processed entry from Step 2. Process them in ascending order.
 
-If no new entries exist, skip to Step 8. Log: *No new entries to process. Corpus is current.*
+For each selected row, fetch its page content. That content is the transcript. Addendum rows are processed as their own entry; `entry_ref` is the row's `Entry` value.
+
+Read only. Never create, edit or delete rows.
+
+If no new rows exist, skip to Step 8. Log: *No new entries to process. Corpus is current.*
 
 ---
 
-## Step 4 — Self-assessment declaration
+## Step 4: Self-assessment declaration
 
 Before extracting anything, output the mandatory declaration as defined in `extraction-rules.md` Step 3.
 
@@ -98,7 +106,7 @@ Do not begin extraction until this declaration is complete.
 
 ---
 
-## Step 5 — Extract beats
+## Step 5: Extract beats
 
 For each unprocessed entry, apply the full extraction rules from `extraction-rules.md`.
 
@@ -106,15 +114,15 @@ Key reminders:
 - A beat opens on a breach of expectation, not an emotion shift
 - The prior expectation must be stated or strongly implied within the entry itself
 - Select the verbatim before writing the emotion label
-- Derive `emotion_valence` and `emotion_arousal` from the label using the Russell grid — verify consistency before finalising
+- Derive `emotion_valence` and `emotion_arousal` from the label using the Russell grid, and verify consistency before finalising
 - Apply the scope test to every field
 - Apply Rules A through E throughout
 
-If an entry produces no beats, log: *Entry [ref] — no qualifying beats extracted.* Continue to next entry.
+If an entry produces no beats, log: *Entry [ref]: no qualifying beats extracted.* Continue to next entry.
 
 ---
 
-## Step 6 — Commit updated corpus to GitHub
+## Step 6: Commit updated corpus to GitHub
 
 Take the existing corpus array from Step 2. Append the new beats. Do not reorder or modify existing records.
 
@@ -139,37 +147,38 @@ If the commit fails, stop. Log the failure. Do not retry automatically.
 
 ---
 
-## Step 7 — Output extraction note
+## Step 7: Output extraction note
 
 - Entries processed: [list]
 - Beats extracted: [count]
 - Total corpus after commit: [new total] beats
 - Commit URL: [url]
-- Ambiguous labels: [if any — exact text only]
-- Theme candidate text: [if any — exact text and beat reference only, no proposed label]
+- Ambiguous labels: [if any, exact text only]
+- Theme candidate text: [if any, exact text and beat reference only, no proposed label]
 
 ---
 
-## Step 8 — Log to your Notion project log
+## Step 8: Log to the project log
 
-Append a run entry to your project log changelog section.
+Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 
 **If new beats were extracted and committed:**
-`[YYYY-MM-DD]` — Extraction run complete. Entries processed: [list]. Beats extracted: [count]. Total corpus: [new total] beats. Commit: [URL].
+`[YYYY-MM-DD]` Extraction run complete. Entries processed: [list]. Beats extracted: [count]. Total corpus: [new total] beats. Commit: [URL].
 
 **If no new entries were found:**
-`[YYYY-MM-DD]` — Extraction run. No new entries. Corpus unchanged at [total] beats.
+`[YYYY-MM-DD]` Extraction run. No new entries. Corpus unchanged at [total] beats.
 
 **If extraction failed at any step:**
-`[YYYY-MM-DD]` — Extraction run failed at Step [N]. Reason: [error]. No changes made to corpus.
+`[YYYY-MM-DD]` Extraction run failed at Step [N]. Reason: [error]. No changes made to corpus.
 
 ---
 
 ## Failure handling
 
+**Missing configuration:** stop. Ask for the missing value.
 **Any doc fetch fails (Step 1):** stop. Do not extract without the rules.
 **Corpus fetch fails (Step 2):** stop. Cannot determine last processed entry safely.
-**Notion read fails (Step 3):** stop. Cannot extract without source data.
+**Database read fails (Step 3):** stop. Cannot extract without source data.
 **GitHub commit fails (Step 6):** stop. Do not retry. Corpus is unchanged.
 **Partial extraction:** commit what was extracted. Log both successes and empty entries.
 
@@ -203,4 +212,4 @@ Append a run entry to your project log changelog section.
 
 ---
 
-*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map — June 2026 — v3.0*
+*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.0*
