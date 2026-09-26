@@ -5,7 +5,7 @@ description: Extraction skill for the AI Journey Map project. Run this skill whe
 
 # AI Journey Map: Extraction Skill v4
 
-Fully cloud-based. Reads rules and corpus from GitHub. Reads entries from a Notion database. Writes beats back to GitHub via API. No local files required.
+Fully cloud-based. Reads rules and corpus from GitHub. Reads entries from a Notion database. Writes beats to a GitHub branch and opens a pull request for the author to merge. No local files required.
 
 ---
 
@@ -123,11 +123,21 @@ If an entry produces no beats, log: *Entry [ref]: no qualifying beats extracted.
 
 ---
 
-## Step 6: Commit updated corpus to GitHub
+## Step 6: Commit to an integrity branch
 
-Take the existing corpus array from Step 2. Append the new beats. Do not reorder or modify existing records.
+Never commit to `main`. The author merges after checking the integrity results. The check is technical, never editorial.
 
-Encode the updated array as base64. Push via GitHub API:
+1. Create a branch from `main` named `extraction-[YYYY-MM-DD]`.
+2. Take the corpus array from Step 2 and append the new beats. Do not reorder or modify existing records.
+3. Run these integrity checks in code. All must pass:
+   - Every existing record is byte-identical to the corpus on `main`.
+   - Every new verbatim is an exact substring of its own entry's transcript.
+   - Every tag exists in the current taxonomy, with 1 to 3 per beat.
+   - Every new beat carries `schema_version` and `taxonomy_version` matching the current docs.
+   - New beat_ids continue the sequence without gaps.
+   - The file is valid JSON, UTF-8, with non-ASCII characters written as-is.
+4. If any check fails: stop, commit nothing, and report which check failed and why.
+5. If all pass: commit to the branch via the GitHub API (message: `corpus: append [N] beat(s) -- [YYYY-MM-DD]`), then open a pull request from the branch to `main`.
 
 ```
 PUT https://api.github.com/repos/{GITHUB_REPO}/contents/data/corpus.json
@@ -138,13 +148,9 @@ Accept: application/vnd.github.v3+json
   "message": "corpus: append [N] beat(s) -- [YYYY-MM-DD]",
   "content": "[base64-encoded updated corpus]",
   "sha": "[sha from Step 2]",
-  "branch": "main"
+  "branch": "extraction-[YYYY-MM-DD]"
 }
 ```
-
-Wait for confirmation. Store the commit URL from the response.
-
-If the commit fails, stop. Log the failure. Do not retry automatically.
 
 ---
 
@@ -152,8 +158,8 @@ If the commit fails, stop. Log the failure. Do not retry automatically.
 
 - Entries processed: [list]
 - Beats extracted: [count]
-- Total corpus after commit: [new total] beats
-- Commit URL: [url]
+- Integrity checks: [pass/fail, each]
+- Branch and pull request: [links]
 - Ambiguous labels: [if any, exact text only]
 - Theme candidate text: [if any, exact text and beat reference only, no proposed label]
 
@@ -163,8 +169,8 @@ If the commit fails, stop. Log the failure. Do not retry automatically.
 
 Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 
-**If new beats were extracted and committed:**
-`[YYYY-MM-DD]` Extraction run complete. Entries processed: [list]. Beats extracted: [count]. Total corpus: [new total] beats. Commit: [URL].
+**If committed to a branch:**
+`[YYYY-MM-DD]` Extraction run complete. Entries processed: [list]. Beats extracted: [count]. Integrity checks passed. Awaiting merge: [pull request link].
 
 **If no new entries were found:**
 `[YYYY-MM-DD]` Extraction run. No new entries. Corpus unchanged at [total] beats.
@@ -180,7 +186,7 @@ Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 **Any doc fetch fails (Step 1):** stop. Do not extract without the rules.
 **Corpus fetch fails (Step 2):** stop. Cannot determine last processed entry safely.
 **Database read fails (Step 3):** stop. Cannot extract without source data.
-**GitHub commit fails (Step 6):** stop. Do not retry. Corpus is unchanged.
+**Integrity check or commit fails (Step 6):** stop, commit nothing, report. Corpus is unchanged.
 **Partial extraction:** commit what was extracted. Log both successes and empty entries.
 
 ---
@@ -214,4 +220,4 @@ Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 
 ---
 
-*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.1*
+*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.2*
