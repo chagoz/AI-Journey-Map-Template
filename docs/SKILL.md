@@ -117,6 +117,7 @@ Key reminders:
 - Derive `emotion_valence` and `emotion_arousal` from the label using the Russell grid, and verify consistency before finalising
 - Apply the scope test to every field
 - Apply Rules A through E throughout
+- Set `schema_version` to the version of `extraction-rules.md` and `taxonomy_version` to the version of `taxonomy.md`
 
 If an entry produces no beats, log: *Entry [ref]: no qualifying beats extracted.* Continue to next entry.
 
@@ -190,7 +191,8 @@ Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 [
   {
     "beat_id": "beat_001",
-    "schema_version": "v3",
+    "schema_version": "v4",
+    "taxonomy_version": "v3",
     "entry_ref": "Entry 01",
     "date": "YYYY-MM-DD",
     "emotion": "cautious curiosity",
@@ -212,4 +214,4 @@ Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 
 ---
 
-*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.0*
+*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.1*
