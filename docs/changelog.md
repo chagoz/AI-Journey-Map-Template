@@ -10,6 +10,7 @@
 - taxonomy.md updated to v3: eight new tags, two definitions broadened
 - schema.md and extraction-rules.md updated to v4: `taxonomy_version` field, one-tag-by-default rule, versioned re-tag procedure
 - SKILL.md updated to v4.1: new beats carry `schema_version` v4 and `taxonomy_version` v3
+- SKILL.md updated to v4.2: extraction commits to an integrity branch after code-level checks and opens a pull request; never commits to main
 
 ## Template v2 — June 26, 2026
 
