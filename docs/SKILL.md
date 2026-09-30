@@ -23,11 +23,18 @@ These are never written to any file or output. If any is missing, stop and ask f
 
 ## Source setup
 
-**Rules and docs (raw GitHub):**
-- Methodology: `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/methodology.md`
-- Schema: `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/schema.md`
-- Extraction rules: `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/extraction-rules.md`
-- Taxonomy: `https://raw.githubusercontent.com/{GITHUB_REPO}/main/docs/taxonomy.md`
+**Rules and docs (GitHub API, not raw URLs):**
+Read each doc through the contents endpoint on `main`:
+
+```
+GET https://api.github.com/repos/{GITHUB_REPO}/contents/docs/{name}.md?ref=main
+Authorization: token {GITHUB_TOKEN}
+Accept: application/vnd.github.v3.raw
+```
+
+- `{name}`: `methodology`, `schema`, `extraction-rules`, `taxonomy`
+
+Do not use `raw.githubusercontent.com`: it has served outdated versions of these docs.
 
 **Corpus (GitHub API):**
 - `https://api.github.com/repos/{GITHUB_REPO}/contents/data/corpus.json`
@@ -46,12 +53,14 @@ One row per voice note. The row's page content is the raw transcript. Rows are n
 
 ## Step 1: Read the rules
 
-Fetch and read these four documents in order:
+Fetch these four documents in order, through the GitHub API (see Source setup), and read them:
 
 1. `methodology.md`: the intellectual foundation. Understand the beat definition, the hybrid emotion protocol, and the declared limitations.
 2. `schema.md`: the field reference. Confirm field names, types, and constraints before extracting any record.
 3. `extraction-rules.md`: the mechanical rules. Every field definition, every anti-inference rule, every edge case.
 4. `taxonomy.md`: the theme taxonomy. Read the full definition and linguistic anchor for every tag before applying any.
+
+After fetching, read the version in each document's title and record it. Use the `extraction-rules.md` version as `schema_version` and the `taxonomy.md` version as `taxonomy_version` in Step 5.
 
 Do not proceed until all four are read and confirmed. If any fetch fails, stop and log the failure.
 
@@ -220,4 +229,4 @@ Append a run entry to the changelog section of the page at `NOTION_PROJECT_LOG`.
 
 ---
 
-*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.2*
+*Based on the AI Journey Map extraction skill by Charline Vergoz. Original project: github.com/chagoz/AI-Journey-Map. September 2026, v4.3*
