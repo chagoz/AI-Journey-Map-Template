@@ -4,6 +4,9 @@
 
 ---
 
+## Template v3.1 · September 30, 2026
+- SKILL.md updated to v4.3: rules and docs are read through the GitHub API contents endpoint instead of raw.githubusercontent.com, which served outdated versions; Step 1 records each doc's version from its title and uses it for `schema_version` and `taxonomy_version`
+
 ## Template v3 · September 25, 2026
 - SKILL.md updated to v4: reads entries from a Notion database (one row per entry) instead of a single page, runs on chat trigger only, reads configuration from project instructions, compares entry numbers as numbers, decodes the corpus explicitly as UTF-8
 - methodology.md updated to v1.1: raw data layer section, two new declared limitations
