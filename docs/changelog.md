@@ -5,6 +5,7 @@
 ---
 
 ## Template v3.1 · September 30, 2026
+- extraction-rules.md clarified (title stays v4): `schema_version` follows this document's title, `entry_ref` refers to the Voice notes database, Step 6 example shows `schema_version` v4 and `taxonomy_version` v3
 - SKILL.md updated to v4.3: rules and docs are read through the GitHub API contents endpoint instead of raw.githubusercontent.com, which served outdated versions; Step 1 records each doc's version from its title and uses it for `schema_version` and `taxonomy_version`
 
 ## Template v3 · September 25, 2026
